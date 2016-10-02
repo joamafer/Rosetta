@@ -1,13 +1,13 @@
 # JoseParser
 JoseParser is a Mac app created on my own to save tons of time while working in my current company by automatically parsing the class models we need from Swagger.io API docs.
 
-
+![Screenshot](Readme Resources/Screenshot.png)
 
 ## Why?
-In our company we use to work with Swagger.io. I was always finding myself time after time tediuosly copy-pasting the model from the online documentation just to generate our own model classes in Swift. It was a really tedious task and I was losing a lot of time just doing the same. So I thought that could be made in an automatic way. I decided to create this Mac OS app which generates the classes we need on its own.
+In our company we use to work with Swagger.io. I was always finding myself time after time tediuosly copy-pasting the models one by one from the online documentation just to generate our own model classes in Swift. It was a really heavy task and I was losing tons of time just doing the same task. So I thought that could be made in an automatic way, therefore I decided to create this Mac OS app which generates the classes we need on its own.
 
 ## How it works
-Basically you only need to paste the model class from Swagger.io and it will automatically create the Swift model class for you. Keep in mind that I have adapted the resulting code specifically to our components, so we have 100% fully ready and integrated classes for our projects. It's also mapping the enum values and creating the enumerations for you.
+Basically you only need to paste the model class from Swagger.io in the left text view and it will automatically create the Swift model class for you in the right one. Then you can correct it in case it generated any error or simply check that everything was good. Finally there's a button which saves your class file in the desktop. Keep in mind that I have adapted the resulting code specifically to our company and way of work, so we have 100% fully ready and integrated classes for our projects. It's also mapping the enum values and creating the enumerations for you.
 
 ## That's all?
 I have in mind a lot of improvements for this app, like:
