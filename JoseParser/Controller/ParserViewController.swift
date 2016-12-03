@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  ParserViewController.swift
 //  JoseParser
 //
 //  Created by JOSE ANTONIO MARTINEZ FERNANDEZ on 25/08/2016.
@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class ViewController: NSViewController, NSTextStorageDelegate, ParserDelegate {
+class ParserViewController: NSViewController, NSTextStorageDelegate, ParserDelegate {
     @IBOutlet var parserTextView: NSTextView!
     @IBOutlet var parsedTextView: NSTextView!
     @IBOutlet weak var authorTextField: NSTextField!
@@ -16,7 +16,7 @@ class ViewController: NSViewController, NSTextStorageDelegate, ParserDelegate {
     @IBOutlet weak var projectNameTextField: NSTextField!
     @IBOutlet weak var parseButton: NSButton!
     @IBOutlet weak var saveFileToDeskopButton: NSButton!
-    let parser = Parser()
+    var parser = Parser()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,16 +28,16 @@ class ViewController: NSViewController, NSTextStorageDelegate, ParserDelegate {
     // MARK: - Setup
     
     func setupTextFields() {
-        if let author = NSUserDefaults.standardUserDefaults().objectForKey("Author") {
-            authorTextField.stringValue = author as! String
-        }
         
-        if let company = NSUserDefaults.standardUserDefaults().objectForKey("Company") {
-            companyTextField.stringValue = company as! String
-        }
-        
-        if let projectName = NSUserDefaults.standardUserDefaults().objectForKey("ProjectName") {
-            projectNameTextField.stringValue = projectName as! String
+        if PreferencesKeys.get(setting: PreferencesKeys.addCommentsHeader) ?? NSOnState == NSOnState {
+            authorTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.author) ?? ""
+            companyTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.companyName) ?? ""
+            projectNameTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.projectName) ?? ""
+            
+        } else {
+            authorTextField.isEnabled = false
+            companyTextField.isEnabled = false
+            projectNameTextField.isEnabled = false
         }
     }
     
@@ -48,43 +48,51 @@ class ViewController: NSViewController, NSTextStorageDelegate, ParserDelegate {
     
     // MARK: - Actions
     
-    @IBAction func parseButtonWasTapped(sender: AnyObject) {
+    @IBAction func parseButtonWasTapped(_ sender: AnyObject) {
         if let text = parserTextView.string {
             parser.parse(text, author: authorTextField.stringValue, company: companyTextField.stringValue, projectName: projectNameTextField.stringValue, delegate: self)
         }
     }
     
-    @IBAction func saveFileDesktopButtonWasTapped(sender: AnyObject) {
+    @IBAction func saveFileDesktopButtonWasTapped(_ sender: AnyObject) {
         if let text = parsedTextView.string {
             parser.createFile(text)
         }
     }
     
-    @IBAction func helpButtonWasTapped(sender: NSButton) {
+    @IBAction func helpButtonWasTapped(_ sender: NSButton) {
         let alert = NSAlert()
-        alert.addButtonWithTitle("Got it!")
+        alert.addButton(withTitle: "Got it!")
         alert.informativeText = "- Paste the model class from Swagger API docs.\n- Tap on Parse button.\n- Check the parsed text is ok or modify it.\n- Tap on Save File in Desktop."
         alert.messageText = "How to use this app"
-        alert.beginSheetModalForWindow(self.view.window!) { modalResponse in
+        alert.beginSheetModal(for: self.view.window!, completionHandler: { modalResponse in
             print("hello")
-        }
+        }) 
     }
     
     // MARK: - NSTextStorageDelegate
     
-    override func textStorageDidProcessEditing(notification: NSNotification) {
-        parseButton.enabled = parserTextView.string?.characters.count > 0
-        saveFileToDeskopButton.enabled = parsedTextView.string?.characters.count > 0
+    override func textStorageDidProcessEditing(_ notification: Notification) {
+        if let parserString = parserTextView.string {
+            parseButton.isEnabled = parserString.characters.count > 0
+        } else {
+            parseButton.isEnabled = false
+        }
+        
+        if let parsedString = parsedTextView.string {
+            saveFileToDeskopButton.isEnabled = parsedString.characters.count > 0
+        } else {
+            saveFileToDeskopButton.isEnabled = false
+        }
     }
     
     // MARK: - ParserDelegate
     
-    func parserDidSuccess(parsedString: String) {
+    func parserDidSuccess(_ parsedString: String) {
         parsedTextView.string = parsedString
     }
     
-    func parseDidFail(error: String) {
+    func parseDidFail(_ error: String) {
         NSBeep()
     }
 }
-
