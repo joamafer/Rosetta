@@ -14,7 +14,7 @@
 		4D2A081C1D6F74C700BB9FB7 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2A081B1D6F74C700BB9FB7 /* Parser.swift */; };
 		4D3223AE1DE28C450058B742 /* JoseParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3223AD1DE28C450058B742 /* JoseParserTests.swift */; };
 		4DE50CC61DE13DBE00AFD5D1 /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE50CC51DE13DBE00AFD5D1 /* PreferencesViewController.swift */; };
-		4DE50CCA1DE255A200AFD5D1 /* PreferencesConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE50CC91DE255A200AFD5D1 /* PreferencesConfiguration.swift */; };
+		4DE50CCA1DE255A200AFD5D1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE50CC91DE255A200AFD5D1 /* Constants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +39,7 @@
 		4D3223AD1DE28C450058B742 /* JoseParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoseParserTests.swift; sourceTree = "<group>"; };
 		4D3223AF1DE28C450058B742 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4DE50CC51DE13DBE00AFD5D1 /* PreferencesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PreferencesViewController.swift; path = Controller/PreferencesViewController.swift; sourceTree = "<group>"; };
-		4DE50CC91DE255A200AFD5D1 /* PreferencesConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PreferencesConfiguration.swift; path = Configuration/PreferencesConfiguration.swift; sourceTree = "<group>"; };
+		4DE50CC91DE255A200AFD5D1 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = Configuration/Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,7 +121,7 @@
 		4DE50CC81DE2544E00AFD5D1 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
-				4DE50CC91DE255A200AFD5D1 /* PreferencesConfiguration.swift */,
+				4DE50CC91DE255A200AFD5D1 /* Constants.swift */,
 			);
 			name = Configuration;
 			sourceTree = "<group>";
@@ -230,7 +230,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D2A080E1D6F749800BB9FB7 /* ParserViewController.swift in Sources */,
-				4DE50CCA1DE255A200AFD5D1 /* PreferencesConfiguration.swift in Sources */,
+				4DE50CCA1DE255A200AFD5D1 /* Constants.swift in Sources */,
 				4D2A080C1D6F749800BB9FB7 /* AppDelegate.swift in Sources */,
 				4D2A081C1D6F74C700BB9FB7 /* Parser.swift in Sources */,
 				4DE50CC61DE13DBE00AFD5D1 /* PreferencesViewController.swift in Sources */,

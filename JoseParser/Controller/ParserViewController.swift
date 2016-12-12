@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class ParserViewController: NSViewController, NSTextStorageDelegate, ParserDelegate {
+class ParserViewController: NSViewController {
     @IBOutlet var parserTextView: NSTextView!
     @IBOutlet var parsedTextView: NSTextView!
     @IBOutlet weak var authorTextField: NSTextField!
@@ -16,29 +16,35 @@ class ParserViewController: NSViewController, NSTextStorageDelegate, ParserDeleg
     @IBOutlet weak var projectNameTextField: NSTextField!
     @IBOutlet weak var parseButton: NSButton!
     @IBOutlet weak var saveFileToDeskopButton: NSButton!
-    var parser = Parser()
+    var parser: Parser!
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.registerPreferencesNotification()
         self.setupTextFields()
         self.setupTextViews()
     }
     
     // MARK: - Setup
     
+    func registerPreferencesNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(updateLayout), name: .preferencesUpdated, object: nil)
+    }
+    
     func setupTextFields() {
+        authorTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.author) ?? ""
+        companyTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.companyName) ?? ""
+        projectNameTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.projectName) ?? ""
         
-        if PreferencesKeys.get(setting: PreferencesKeys.addCommentsHeader) ?? NSOnState == NSOnState {
-            authorTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.author) ?? ""
-            companyTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.companyName) ?? ""
-            projectNameTextField.stringValue = PreferencesKeys.get(setting: PreferencesKeys.projectName) ?? ""
-            
-        } else {
-            authorTextField.isEnabled = false
-            companyTextField.isEnabled = false
-            projectNameTextField.isEnabled = false
-        }
+        let shouldEnable = PreferencesKeys.get(setting: PreferencesKeys.addCommentsHeader) ?? NSOnState == NSOnState
+        authorTextField.isEnabled = shouldEnable
+        companyTextField.isEnabled = shouldEnable
+        projectNameTextField.isEnabled = shouldEnable
     }
     
     func setupTextViews() {
@@ -46,11 +52,18 @@ class ParserViewController: NSViewController, NSTextStorageDelegate, ParserDeleg
         self.parsedTextView.textStorage?.delegate = self
     }
     
+    // MARK: - Notifications
+    
+    func updateLayout() {
+        setupTextFields()
+    }
+    
     // MARK: - Actions
     
     @IBAction func parseButtonWasTapped(_ sender: AnyObject) {
         if let text = parserTextView.string {
-            parser.parse(text, author: authorTextField.stringValue, company: companyTextField.stringValue, projectName: projectNameTextField.stringValue, delegate: self)
+            parser = Parser(delegate: self)
+            parser.parse(textToParse: text)
         }
     }
     
@@ -65,34 +78,51 @@ class ParserViewController: NSViewController, NSTextStorageDelegate, ParserDeleg
         alert.addButton(withTitle: "Got it!")
         alert.informativeText = "- Paste the model class from Swagger API docs.\n- Tap on Parse button.\n- Check the parsed text is ok or modify it.\n- Tap on Save File in Desktop."
         alert.messageText = "How to use this app"
-        alert.beginSheetModal(for: self.view.window!, completionHandler: { modalResponse in
-            print("hello")
-        }) 
+        alert.beginSheetModal(for: self.view.window!, completionHandler: nil)
     }
-    
-    // MARK: - NSTextStorageDelegate
-    
+}
+
+extension ParserViewController: NSTextStorageDelegate {
     override func textStorageDidProcessEditing(_ notification: Notification) {
         if let parserString = parserTextView.string {
-            parseButton.isEnabled = parserString.characters.count > 0
+            parseButton.isEnabled = !parserString.isEmpty
         } else {
             parseButton.isEnabled = false
         }
         
         if let parsedString = parsedTextView.string {
-            saveFileToDeskopButton.isEnabled = parsedString.characters.count > 0
+            saveFileToDeskopButton.isEnabled = !parsedString.isEmpty
         } else {
             saveFileToDeskopButton.isEnabled = false
         }
     }
+}
+
+extension ParserViewController: NSControlTextEditingDelegate {
+    func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
+        switch control {
+        case authorTextField:
+            PreferencesKeys.set(setting: .author, value: fieldEditor.string)
+        case projectNameTextField:
+            PreferencesKeys.set(setting: .projectName, value: fieldEditor.string)
+        case companyTextField:
+            PreferencesKeys.set(setting: .companyName, value: fieldEditor.string)
+        default:
+            break
+        }
+        
+        return true
+    }
+}
+
+extension ParserViewController: ParserDelegate {
     
-    // MARK: - ParserDelegate
-    
-    func parserDidSuccess(_ parsedString: String) {
+    func parseDidSuccess(_ parsedString: String) {
         parsedTextView.string = parsedString
     }
     
     func parseDidFail(_ error: String) {
+        // TODO: Show error
         NSBeep()
     }
 }

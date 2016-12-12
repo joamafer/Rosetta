@@ -9,7 +9,7 @@
 import AppKit
 
 enum MappingMode: String {
-    case manual = "Manual", objectmapper = "ObjectMapper", swiftyJSON = "SwiftyJSON", freddy = "Freddy", gloss = "Gloss"
+    case manual = "Manual", objectmapper = "ObjectMapper", swiftyJSON = "SwiftyJSON (coming soon)", freddy = "Freddy (coming soon)", gloss = "Gloss (coming soon)"
     
     static let allValues = [manual, objectmapper, swiftyJSON, freddy, gloss].map{ $0.rawValue }
 }
@@ -24,4 +24,8 @@ enum PreferencesKeys: String {
     static func set<T>(setting key: PreferencesKeys, value: T) {
         UserDefaults.standard.set(value, forKey: key.rawValue)
     }
+}
+
+extension Notification.Name {
+    static let preferencesUpdated = Notification.Name("preferencesUpdated")
 }

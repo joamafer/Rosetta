@@ -7,123 +7,182 @@
 //
 
 import Foundation
+import Cocoa
 
-enum VariableTypes : String {
-    case Number = "number"
-    case Integer = "integer"
-    case Boolean = "boolean"
+enum VariableTypes: String {
+    case number, integer, boolean
 
-    static func convertVariableType(_ variableType : String) -> String {
-        var finalType = variableType
+    static func getFinalType(_ variableType : String) -> String {
         
-        if let specialVariableType = VariableTypes(rawValue: variableType) {
-        
-            switch specialVariableType {
-            case .Number:
-                finalType = "Double"
-            case .Integer:
-                finalType = "Int"
-            case .Boolean:
-                finalType = "Bool"
+        if let varType = VariableTypes(rawValue: variableType) {
+            switch varType {
+            case .number:
+                return "Double"
+            case .integer:
+                return "Int"
+            case .boolean:
+                return "Bool"
             }
         }
         
-        return finalType.capitalized
+        return variableType
     }
 }
 
 protocol ParserDelegate : class {
-    func parserDidSuccess(_ parsedString: String)
+    func parseDidSuccess(_ parsedString: String)
     func parseDidFail(_ error : String)
 }
 
 class Parser {
-    var className : String!
-    var variables : [(String, String, [String]?)] = []
-    var parsedString = ""
-    weak var delegate : ParserDelegate?
+    var className: String!
+    var modelVariables: [(varName: String, varType: String, enumValues: [String]?)]!
+    var parsedString: String!
+    var mappingMode: MappingMode!
+    weak var delegate: ParserDelegate?
     
-    func parse(_ text: String, author: String, company: String, projectName: String, delegate: ParserDelegate) {
-        
-        self.className = ""
-        self.variables = []
-        self.parsedString = ""
-        self.delegate = nil
-        
+    required init(delegate: ParserDelegate) {
         self.delegate = delegate
+    }
+    
+    func parse(textToParse: String) {
         
-        UserDefaults.standard.set(author, forKey: "Author")
-        UserDefaults.standard.set(company, forKey: "Company")
-        UserDefaults.standard.set(projectName, forKey: "ProjectName")
+        guard let mappingMode = MappingMode(rawValue:PreferencesKeys.get(setting: PreferencesKeys.mappingMode) ?? "") else {
+            return
+        }
         
-        let curlyBracketsCharacterSet = CharacterSet(charactersIn: "{}")
-        let fileComponents = text.components(separatedBy: curlyBracketsCharacterSet).filter {$0 != ""}
+        self.mappingMode = mappingMode
+        self.modelVariables = []
+        self.parsedString = ""
         
-        if fileComponents.count == 2 {
-            self.className = fileComponents[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            let lines : [String] = fileComponents[1].components(separatedBy: .newlines).filter {$0 != ""}
-            
-            for line in lines {
-                if let tuple = self.parseLine(line.replacingOccurrences(of: " ", with: "")) {
-                    variables.append(tuple)
-                }
-            }
-            
-            parsedString = self.createFileInfo(author, company: company, projectName: projectName)
-            let enumTuples = variables.filter( { $2 != nil } )
-            for enumTuple in enumTuples {
-                parsedString = parsedString + self.createFileEnum((enumTuple.0, enumTuple.1, enumTuple.2!))
-            }
-            
-            parsedString = parsedString + self.createFileBody(variables)
-            
-            self.delegate?.parserDidSuccess(parsedString)
-            
+        let fileComponents = textToParse.components(separatedBy: CharacterSet(charactersIn: "{}")).filter { !$0.isEmpty }
+        
+        guard fileComponents.count == 2 else {
+            self.delegate?.parseDidFail("The format of the model provided is not correct")
+            return
+        }
+        
+        self.className = fileComponents[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if let state: Int = PreferencesKeys.get(setting: .addCommentsHeader),
+            state != NSOnState {
         } else {
-            self.delegate?.parseDidFail("The format of the model is not correct")
+            createFileHeader(header: fileComponents[0])
+        }
+        
+        createFileImports()
+        createBody(body: fileComponents[1])
+        
+        self.delegate?.parseDidSuccess(parsedString)
+    }
+    
+    /// Creates the comment code about the project name, author, company name and copyright
+    ///
+    /// - Parameter header: String not parsed which contains the class name
+    func createFileHeader(header: String) {
+        
+        var fileInfo = "//\n//  " + className + ".swift\n"
+        
+        let projectName = PreferencesKeys.get(setting: .projectName) ?? ""
+        let author = PreferencesKeys.get(setting: .author) ?? ""
+        let companyName = PreferencesKeys.get(setting: .companyName) ?? ""
+        
+        if !projectName.isEmpty {
+            fileInfo = fileInfo + "//  \(projectName)\n"
+        }
+        fileInfo = fileInfo + "//\n//  Created"
+        
+        if !author.isEmpty {
+            fileInfo = fileInfo + " by \(author)"
+        }
+        
+        fileInfo = fileInfo + " on "
+        let date = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
+        fileInfo = fileInfo + "\(date)\n"
+        
+        if !companyName.isEmpty {
+            fileInfo = fileInfo + "//  Copyright © "
+            
+            let start = date.index(date.startIndex, offsetBy: 6)
+            let end = date.endIndex
+            
+            fileInfo = fileInfo + date.substring(with: start..<end) + " "
+            fileInfo = fileInfo + companyName
+            fileInfo = fileInfo + ". All rights reserved.\n//\n\n"
+        }
+        
+        parsedString = fileInfo
+    }
+    
+    /// Create file imports needed depending on the mapping the user choose
+    func createFileImports() {
+        
+        switch mappingMode! {
+        case .objectmapper:
+            parsedString = parsedString + "import ObjectMapper\n\n"
+        case .manual:
+            break
+        case .freddy, .gloss, .swiftyJSON:
+            // TODO: Work on this
+            break
         }
     }
     
-    func parseLine(_ line : String) -> (String, String, [String]?)? {
+    /// Parse the body of the model. Contains the mapping of enums and implementation
+    ///
+    /// - Parameter body: model before parsing
+    func createBody(body: String) {
+        let lines: [String] = body.components(separatedBy: .newlines).filter{ !$0.isEmpty }
+        
+        for line in lines {
+            if let tuple = self.parseLine(String(line.characters.filter{ !" \n\t\r".characters.contains($0) })) {
+                modelVariables.append(tuple)
+            }
+        }
+        
+        let enumTuples = modelVariables.filter( { $2 != nil } )
+        for enumTuple in enumTuples {
+            parsedString = parsedString + self.createFileEnum((enumTuple.0, enumTuple.1, enumTuple.2!))
+        }
+        
+        parsedString = parsedString + self.createFileBody()
+    }
+    
+    func parseLine(_ line : String) -> (varName: String, varType: String, enumValues: [String]?)? {
         
         let customCharacterSet = CharacterSet(charactersIn: "(,")
-        let lineComponents = line.components(separatedBy: customCharacterSet).filter{ $0 != ""}
+        let lineComponents = line.components(separatedBy: customCharacterSet).filter{ !$0.isEmpty }
         
-        if lineComponents.count > 2 {
-            
-            let variableName = lineComponents[0]
-            let variableType = VariableTypes.convertVariableType(lineComponents[1])
-            var enumValues : [String]?
-            
-            if lineComponents.count > 3 { // enum
-                
-                let customCharacterSet = CharacterSet(charactersIn: "[]")
-                let enumComponents = line.components(separatedBy: customCharacterSet).filter{ $0 != ""}
-                
-                if enumComponents.count == 3 {
-                    enumValues = self.parseEnum(enumComponents[1])
-                }
-            }
-            
-            return (variableName, variableType, enumValues)
-            
-        } else {
+        guard lineComponents.count > 2 else {
             self.delegate?.parseDidFail("Cannot parse line")
-            
             return nil
         }
+        
+        let variableName = lineComponents[0]
+        let variableType = VariableTypes.getFinalType(lineComponents[1])
+        var enumValues : [String]?
+        
+        if lineComponents.count > 3 { // line is an enum
+            
+            let customCharacterSet = CharacterSet(charactersIn: "[]")
+            let enumComponents = line.components(separatedBy: customCharacterSet).filter{ !$0.isEmpty }
+            
+            if enumComponents.count == 3 {
+                enumValues = self.parseEnumValues(enumComponents[1])
+            }
+        }
+        
+        return (varName: variableName, varType: variableType, enumValues: enumValues)
     }
     
-    func parseEnum(_ lineWithEnum : String) -> [String] {
+    func parseEnumValues(_ lineWithEnum : String) -> [String] {
         let squareBracketsCharacterSet = CharacterSet(charactersIn: ",")
-        return lineWithEnum.components(separatedBy: squareBracketsCharacterSet).filter{ $0 != "," && $0 != "" }
+        
+        return lineWithEnum.components(separatedBy: squareBracketsCharacterSet).filter{ $0 != "," && !$0.isEmpty }
     }
-    
-    // MARK: - File creation
     
     func createFile(_ text : String) {
-        let filename = getDesktopDirectory().appendingPathComponent(className + ".swift")
+        let filename = getDesktopDirectory().appending(className + ".swift")
         
         do {
             try text.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
@@ -132,63 +191,29 @@ class Parser {
         }
     }
     
-    func createFileInfo(_ author: String, company: String, projectName: String) -> String {
-        var fileInfo = "//\n//  " + className + ".swift\n"
-        
-        if projectName.characters.count > 0 {
-            fileInfo = fileInfo + "//  \(projectName)\n"
-        }
-        fileInfo = fileInfo + "//\n//  Created"
-        
-        if author.characters.count > 0 {
-            fileInfo = fileInfo + " by \(author)"
-        }
-        
-        fileInfo = fileInfo + " on "
-        let date = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
-        fileInfo = fileInfo + "\(date)\n"
-        
-        if company.characters.count > 0 {
-            fileInfo = fileInfo + "//  Copyright © "
-            fileInfo = fileInfo + date[date.characters.index(date.startIndex, offsetBy: 6)..<date.characters.index(date.startIndex, offsetBy: 10)] + " "
-            fileInfo = fileInfo + company
-            fileInfo = fileInfo + ". All rights reserved.\n"
-        }
-        
-        fileInfo = fileInfo + "//\n\nimport ObjectMapper\n\n"
-        
-        return fileInfo
-    }
-    
     func createFileEnum(_ tuple: (enumName : String, enumType : String, enumValues : [String])) -> String {
         var fileEnum = ("enum ")
         
-        let firstCharacterRange = tuple.enumName.characters.index(tuple.enumName.startIndex, offsetBy: 0)..<tuple.enumName.characters.index(tuple.enumName.startIndex, offsetBy: 1)
-        let enumNameFirstCharacter = tuple.enumName.substring(with: firstCharacterRange)
-        var enumName = tuple.enumName
-        enumName.replaceSubrange(firstCharacterRange, with: enumNameFirstCharacter.uppercased())
-        
-        fileEnum = fileEnum + enumName
+        fileEnum = fileEnum + tuple.enumName
         fileEnum = fileEnum + ": "
-        fileEnum = fileEnum + (tuple.enumType)
+        fileEnum = fileEnum + tuple.enumType.capitalized
         fileEnum = fileEnum + " {\n"
         
         for enumValue in tuple.enumValues {
-            fileEnum = fileEnum + "    case "
+            fileEnum = fileEnum + indent() + "case "
             
             var enumValueDoubleQuotes = enumValue.replacingOccurrences(of: "'", with: "").lowercased()
             
             var underscoreRange = enumValueDoubleQuotes.range(of: "_")
             
             while underscoreRange != nil {
-                let nextCharacterRange = enumValueDoubleQuotes.index(underscoreRange!.lowerBound, offsetBy: 1) ..< enumValueDoubleQuotes.index(underscoreRange!.lowerBound, offsetBy: 2)
+                let nextCharacterIndex = enumValueDoubleQuotes.index(after: underscoreRange!.lowerBound)
+                let nextCharacterRange = nextCharacterIndex ..< enumValueDoubleQuotes.index(after: nextCharacterIndex)
                 let nextCharacter = enumValueDoubleQuotes.substring(with: nextCharacterRange)
                 enumValueDoubleQuotes.replaceSubrange(nextCharacterRange, with: nextCharacter.uppercased())
                 enumValueDoubleQuotes.replaceSubrange(underscoreRange!, with: "")
                 underscoreRange = enumValueDoubleQuotes.range(of: "_")
             }
-            
-            enumValueDoubleQuotes.replaceSubrange(enumValueDoubleQuotes.characters.index(enumValueDoubleQuotes.startIndex, offsetBy: 0) ..< enumValueDoubleQuotes.characters.index(enumValueDoubleQuotes.startIndex, offsetBy: 1), with: enumValueDoubleQuotes.substring(to: enumValueDoubleQuotes.characters.index(enumValueDoubleQuotes.startIndex, offsetBy: 1)).uppercased())
             
             fileEnum = fileEnum + enumValueDoubleQuotes
             fileEnum = fileEnum + " = "
@@ -199,54 +224,98 @@ class Parser {
         return fileEnum + "}\n\n"
     }
     
-    func createFileBody(_ variables: [(String, String, [String]?)]) -> String {
+    func createFileBody() -> String {
         
-        var fileBody = "public class "
-        fileBody = fileBody + className
-        fileBody = fileBody + ": Mappable {\n\n"
-        
-        for i in 0..<variables.count {
-            fileBody = fileBody + "    var "
-            fileBody = fileBody + (variables[i].0)
+        switch mappingMode! {
+        case .objectmapper:
+            return createBodyObjectMapper()
+        default:
+            return createBodyManual()
+        }
+    }
+    
+    func createVariableDeclarations(body: String) -> String {
+        var fileBody = body
+        for i in 0 ..< modelVariables.count {
+            fileBody = fileBody + "\(indent())var "
+            fileBody = fileBody + (modelVariables[i].0)
             fileBody = fileBody + ": "
             
-            if variables[i].2 != nil {
-                fileBody = fileBody + variables[i].0.setFirstLetterUppercase() + "?\n"
+            if modelVariables[i].2 != nil {
+                fileBody = fileBody + modelVariables[i].0.capitalized + "?\n"
             } else {
-                fileBody = fileBody + (variables[i].1) + "?\n"
+                fileBody = fileBody + (modelVariables[i].1.capitalized) + "?\n"
             }
         }
-
-        fileBody = fileBody + "\n    init() {\n    }\n\n    required public init?(_ map: Map) {\n\n    }\n\n    public func mapping(map: Map) {\n"
         
-        for tuple in variables {
-            fileBody = fileBody + "        "
+        return fileBody
+    }
+    
+    func createBodyObjectMapper() -> String {
+        var fileBody = "public class "
+        fileBody = fileBody + className
+        fileBody = fileBody + ": Mappable {\n"
+        
+        fileBody = createVariableDeclarations(body: fileBody)
+        
+        fileBody = fileBody + "\n\(indent())init() {\n\(indent())}\n\n\(indent())required public init?(_ map: Map) {\n\(indent())}\n\n\(indent())public func mapping(map: Map) {\n"
+        
+        for tuple in modelVariables {
+            fileBody = fileBody + indent(level: 2)
             fileBody = fileBody + (tuple.0)
             fileBody = fileBody + " <- map[\""
             fileBody = fileBody + (tuple.0)
             fileBody = fileBody + "\"]\n"
         }
-
-        fileBody = fileBody + "    }\n}\n"
+        
+        fileBody = fileBody + indent() + "}\n}\n"
         
         return fileBody
     }
     
-    // MARK: - Helpers
-    
-    func getDesktopDirectory() -> NSString {
-        let paths = NSSearchPathForDirectoriesInDomains(.desktopDirectory, .userDomainMask, true)
-        let documentsDirectory = paths[0]
-        return documentsDirectory as NSString
+    func createBodyManual() -> String {
+        var fileBody = "public class "
+        fileBody = fileBody + className
+        fileBody = fileBody + ": NSObject {\n"
+        
+        fileBody = createVariableDeclarations(body: fileBody)
+        
+        fileBody = fileBody + "\n\(indent())func mapArray(mappingArray: [AnyObject]) -> [\(className!)] {\n" + indent(level: 2)
+        fileBody = fileBody + "var mapArray = [\(className!)]()\n" + indent(level: 2)
+        fileBody = fileBody + "for mappingObject in mappingArray {\n" + indent(level: 3)
+        fileBody = fileBody + "if let mapping\(className!) = mappingObject as? [String: Any] {\n" + indent(level: 4)
+        fileBody = fileBody + "let \(className!.lowercased()) = \(className!)()\n" + indent(level: 4)
+        fileBody = fileBody + "\(className!.lowercased()).map(mappingObject: mapping\(className!))\n" + indent(level: 4)
+        fileBody = fileBody + "mapArray.append(\(className!.lowercased()))\n" + indent(level: 3)
+        fileBody = fileBody + "}\n" + indent(level: 2)
+        fileBody = fileBody + "}\n\n" + indent(level: 2)
+        fileBody = fileBody + "return mapArray\n" + indent(level: 1) + "}\n\n" + indent(level: 1)
+        
+        fileBody = fileBody + "private func map(mappingObject: [String: Any]) {\n"
+        
+        for tuple in modelVariables {
+            fileBody = fileBody + indent(level: 2)
+            fileBody = fileBody + "if let " + (tuple.0) + " = mappingObject[\"\((tuple.0))\"] as? \(tuple.1.capitalized) {\n" + indent(level: 3)
+            fileBody = fileBody + "self.\((tuple.0)) = \((tuple.0))\n" + indent(level: 2)
+            fileBody = fileBody + "}\n"
+        }
+        
+        fileBody = fileBody + indent() + "}\n}\n"
+        
+        return fileBody
     }
 }
 
-extension String {
-    func setFirstLetterUppercase() -> String {
-        let firstCharacterRange = self.characters.index(self.startIndex, offsetBy: 0)..<self.characters.index(self.startIndex, offsetBy: 1)
-        let enumNameFirstCharacter = self.substring(with: firstCharacterRange)
-        var enumName = self
-        enumName.replaceSubrange(firstCharacterRange, with: enumNameFirstCharacter.uppercased())
-        return enumName
+extension Parser { // Helpers
+    
+    func indent(level: Int = 1) -> String {
+        return String(repeating: " ", count: level * PreferencesKeys.get(setting: .indentationSpaces)!)
+    }
+    
+    func getDesktopDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.desktopDirectory, .userDomainMask, true)
+        let documentsDirectory = paths[0]
+        
+        return documentsDirectory
     }
 }

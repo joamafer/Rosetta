@@ -40,5 +40,7 @@ class PreferencesViewController: NSViewController {
         PreferencesKeys.set(setting: .addCommentsHeader, value: addHeaderCommentsButton.state)
         PreferencesKeys.set(setting: .indentationSpaces, value: spacesIndentationValue)
         PreferencesKeys.set(setting: .mappingMode, value: jsonMappingButton.titleOfSelectedItem)
+        
+        NotificationCenter.default.post(name: .preferencesUpdated, object: nil)
     }
 }
