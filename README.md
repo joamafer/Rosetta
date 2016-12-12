@@ -24,24 +24,25 @@ Please feel free to write any comments, pull requests, forks, etc!
 
 ## Release Notes
 
+0.2.1
+- Update UI by removing all occurrences of the old app name.
+- Clean code and refactoring.
+
 0.2
 - Changed name of the app and icon with inspiration from Rosetta Stone.
 - Added preferences screen where you can set the number of spaces for indentation, toggle the header comments and the mapping service (currently working with manual mapping and objectmapper).
 - Slightly refactoring and cleaning code.
 - Added support for manual mapping.
 
-## In next versions
+## Upcoming versions
 
-0.2.1
-
-- Update UI by removing all occurrences of the old app name.
-- Clean code and refactoring.
+0.2.2
+- Handling mapping of dictionaries inside the main model, e.g. 'prices' dictionary (currency, amount, divisor) inside 'clothes' model.
 
 0.3
 - Clean code and refactoring.
 - Unit Testing.
-- Error handling.
-- Handling mapping of dictionaries inside the main model, e.g. 'prices' dictionary (currency, amount, divisor) inside 'clothes' model.
+- Error handling and show errors visually to the user.
 
 0.4
 - Clean code and refactoring.
