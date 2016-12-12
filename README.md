@@ -37,12 +37,13 @@ Please feel free to write any comments, pull requests, forks, etc!
 ## Upcoming versions
 
 0.2.2
-- Handling mapping of dictionaries inside the main model, e.g. 'prices' dictionary (currency, amount, divisor) inside 'clothes' model.
+- Test for possible bugs/missing features by testing against 'http://petstore.swagger.io'
 
 0.3
 - Clean code and refactoring.
 - Unit Testing.
 - Error handling and show errors visually to the user.
+- Handling mapping of dictionaries inside the main model, e.g. 'prices' dictionary (currency, amount, divisor) inside 'clothes' model.
 
 0.4
 - Clean code and refactoring.
