@@ -30,6 +30,11 @@ Please feel free to write any comments, pull requests, forks, etc!
 
 ## In next versions
 
+0.2.1
+
+- Update UI by removing all occurrences of the old app name.
+- Clean code and refactoring.
+
 0.3
 - Clean code and refactoring.
 - Unit Testing.
