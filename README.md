@@ -1,5 +1,7 @@
-# JoseParser
-JoseParser is a Mac app created on my own to save tons of time while working in my current company by automatically parsing the class models we need from Swagger.io.
+# Rosetta
+![Icon](JoseParser/Assets.xcassets/AppIcon.appiconset/icon_128x128.png)
+
+Rosetta is a Mac app created on my own to save tons of time while working in my current company by automatically parsing the class models we need from Swagger.io.
 
 ![Screenshot](Readme Resources/Screenshot.png)
 
@@ -18,3 +20,30 @@ I have in mind a lot of improvements for this app, like:
 - Adapt it to other API docs services and frameworks (JSONDoc, Mashery, RestKit, etc).
 
 Please feel free to write any comments, pull requests, forks, etc!
+
+## Release Notes
+
+0.2
+- Changed name of the app and icon with inspiration from Rosetta Stone.
+- Added preferences screen where you can set the number of spaces for indentation, toggle the header comments and the mapping service (currently working with manual mapping and objectmapper).
+- Slightly refactoring and cleaning code.
+- Added support for manual mapping.
+
+## In next versions
+
+0.3
+- Clean code and refactoring.
+- Unit Testing.
+- Error handling.
+- Handling mapping of dictionaries inside the main model, e.g. 'prices' dictionary (currency, amount, divisor) inside 'clothes' model.
+
+0.4
+- Clean code and refactoring.
+- Unit Testing.
+- Possibility to create the mapping classes as structs.
+- Onboarding/tutorial/help.
+
+0.5
+- Clean code and refactoring.
+- Unit Testing.
+- Add support for SwiftyJSON.
