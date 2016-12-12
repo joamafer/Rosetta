@@ -25,6 +25,7 @@ class ParserViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        parser = Parser(delegate: self)
         self.registerPreferencesNotification()
         self.setupTextFields()
         self.setupTextViews()
@@ -61,10 +62,20 @@ class ParserViewController: NSViewController {
     // MARK: - Actions
     
     @IBAction func parseButtonWasTapped(_ sender: AnyObject) {
-        if let text = parserTextView.string {
-            parser = Parser(delegate: self)
-            parser.parse(textToParse: text)
+        
+        guard let text = parserTextView.string, !text.isEmpty else {
+            NSBeep()
+            return
         }
+        
+        PreferencesKeys.set(setting: .author, value: authorTextField!.stringValue)
+        PreferencesKeys.set(setting: .projectName, value: projectNameTextField!.stringValue)
+        PreferencesKeys.set(setting: .companyName, value: companyTextField!.stringValue)
+        
+        let shouldAddCommentsHeader = PreferencesKeys.get(setting: PreferencesKeys.addCommentsHeader) ?? NSOnState
+        let mappingModeRawValue = PreferencesKeys.get(setting: .mappingMode) ?? MappingMode.manual.rawValue
+        
+        parser.parse(text: text, addCommentsHeader: shouldAddCommentsHeader == NSOnState, indentSpaces: PreferencesKeys.get(setting: .indentationSpaces) ?? 4, mappingMode: MappingMode(rawValue: mappingModeRawValue)!)
     }
     
     @IBAction func saveFileDesktopButtonWasTapped(_ sender: AnyObject) {
@@ -76,7 +87,7 @@ class ParserViewController: NSViewController {
     @IBAction func helpButtonWasTapped(_ sender: NSButton) {
         let alert = NSAlert()
         alert.addButton(withTitle: "Got it!")
-        alert.informativeText = "- Paste the model class from Swagger API docs.\n- Tap on Parse button.\n- Check the parsed text is ok or modify it.\n- Tap on Save File in Desktop."
+        alert.informativeText = "- Access the app preferences to configure your settings.\n- Paste the model class from Swagger API docs.\n- Tap on Parse button.\n- Check the parsed text is ok or modify it.\n- Tap on Save File in Desktop."
         alert.messageText = "How to use this app"
         alert.beginSheetModal(for: self.view.window!, completionHandler: nil)
     }
