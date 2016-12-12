@@ -1,4 +1,3 @@
-# Rosetta
 ![Icon](Readme Resources/iconHeader.png)
 
 Rosetta is a Mac app created on my own to save tons of time while working in my current company by automatically parsing the class models we need from Swagger.io.
