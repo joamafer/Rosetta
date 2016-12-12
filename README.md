@@ -1,5 +1,4 @@
-# Rosetta
-![Icon](JoseParser/Assets.xcassets/AppIcon.appiconset/icon_128x128.png)
+![Icon](Readme Resources/iconHeader.png)
 
 Rosetta is a Mac app created on my own to save tons of time while working in my current company by automatically parsing the class models we need from Swagger.io.
 
@@ -30,6 +29,11 @@ Please feel free to write any comments, pull requests, forks, etc!
 - Added support for manual mapping.
 
 ## In next versions
+
+0.2.1
+
+- Update UI by removing all occurrences of the old app name.
+- Clean code and refactoring.
 
 0.3
 - Clean code and refactoring.
