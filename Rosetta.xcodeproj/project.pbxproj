@@ -12,7 +12,7 @@
 		4D2A08101D6F749800BB9FB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D2A080F1D6F749800BB9FB7 /* Assets.xcassets */; };
 		4D2A08131D6F749800BB9FB7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D2A08111D6F749800BB9FB7 /* Main.storyboard */; };
 		4D2A081C1D6F74C700BB9FB7 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2A081B1D6F74C700BB9FB7 /* Parser.swift */; };
-		4D3223AE1DE28C450058B742 /* JoseParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3223AD1DE28C450058B742 /* JoseParserTests.swift */; };
+		4D3223AE1DE28C450058B742 /* RosettaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3223AD1DE28C450058B742 /* RosettaTests.swift */; };
 		4DE50CC61DE13DBE00AFD5D1 /* PreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE50CC51DE13DBE00AFD5D1 /* PreferencesViewController.swift */; };
 		4DE50CCA1DE255A200AFD5D1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE50CC91DE255A200AFD5D1 /* Constants.swift */; };
 /* End PBXBuildFile section */
@@ -29,17 +29,17 @@
 
 /* Begin PBXFileReference section */
 		4D2A08081D6F749800BB9FB7 /* Rosetta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rosetta.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D2A080B1D6F749800BB9FB7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4D2A080D1D6F749800BB9FB7 /* ParserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParserViewController.swift; path = Controller/ParserViewController.swift; sourceTree = "<group>"; };
-		4D2A080F1D6F749800BB9FB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4D2A080B1D6F749800BB9FB7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Rosetta/AppDelegate.swift; sourceTree = "<group>"; };
+		4D2A080D1D6F749800BB9FB7 /* ParserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParserViewController.swift; path = Rosetta/Controller/ParserViewController.swift; sourceTree = "<group>"; };
+		4D2A080F1D6F749800BB9FB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Rosetta/Resources/Assets.xcassets; sourceTree = "<group>"; };
 		4D2A08121D6F749800BB9FB7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		4D2A08141D6F749800BB9FB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4D2A081B1D6F74C700BB9FB7 /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		4D2A08141D6F749800BB9FB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = Rosetta/Info.plist; sourceTree = "<group>"; };
+		4D2A081B1D6F74C700BB9FB7 /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Parser.swift; path = Rosetta/Model/Parser.swift; sourceTree = "<group>"; };
 		4D3223AB1DE28C450058B742 /* RosettaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RosettaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D3223AD1DE28C450058B742 /* JoseParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoseParserTests.swift; sourceTree = "<group>"; };
-		4D3223AF1DE28C450058B742 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4DE50CC51DE13DBE00AFD5D1 /* PreferencesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PreferencesViewController.swift; path = Controller/PreferencesViewController.swift; sourceTree = "<group>"; };
-		4DE50CC91DE255A200AFD5D1 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = Configuration/Constants.swift; sourceTree = "<group>"; };
+		4D3223AD1DE28C450058B742 /* RosettaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RosettaTests.swift; path = RosettaTests/RosettaTests.swift; sourceTree = "<group>"; };
+		4D3223AF1DE28C450058B742 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = RosettaTests/Info.plist; sourceTree = "<group>"; };
+		4DE50CC51DE13DBE00AFD5D1 /* PreferencesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PreferencesViewController.swift; path = Rosetta/Controller/PreferencesViewController.swift; sourceTree = "<group>"; };
+		4DE50CC91DE255A200AFD5D1 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = Rosetta/Configuration/Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,8 +63,8 @@
 		4D2A07FF1D6F749800BB9FB7 = {
 			isa = PBXGroup;
 			children = (
-				4D2A080A1D6F749800BB9FB7 /* JoseParser */,
-				4D3223AC1DE28C450058B742 /* JoseParserTests */,
+				4D2A080A1D6F749800BB9FB7 /* Rosetta */,
+				4D3223AC1DE28C450058B742 /* RosettaTests */,
 				4D2A08091D6F749800BB9FB7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -78,17 +78,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4D2A080A1D6F749800BB9FB7 /* JoseParser */ = {
+		4D2A080A1D6F749800BB9FB7 /* Rosetta */ = {
 			isa = PBXGroup;
 			children = (
 				4DE50CC81DE2544E00AFD5D1 /* Configuration */,
 				4DE50CC71DE13DC600AFD5D1 /* Controller */,
 				4D2A081A1D6F74AC00BB9FB7 /* Model */,
+				4D86C0151DFEFD7900A4A1A0 /* Resources */,
 				4D2A080B1D6F749800BB9FB7 /* AppDelegate.swift */,
-				4D2A080F1D6F749800BB9FB7 /* Assets.xcassets */,
 				4D2A08111D6F749800BB9FB7 /* Main.storyboard */,
 				4D2A08141D6F749800BB9FB7 /* Info.plist */,
 			);
+			name = Rosetta;
 			path = JoseParser;
 			sourceTree = "<group>";
 		};
@@ -100,13 +101,22 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
-		4D3223AC1DE28C450058B742 /* JoseParserTests */ = {
+		4D3223AC1DE28C450058B742 /* RosettaTests */ = {
 			isa = PBXGroup;
 			children = (
-				4D3223AD1DE28C450058B742 /* JoseParserTests.swift */,
+				4D3223AD1DE28C450058B742 /* RosettaTests.swift */,
 				4D3223AF1DE28C450058B742 /* Info.plist */,
 			);
+			name = RosettaTests;
 			path = JoseParserTests;
+			sourceTree = "<group>";
+		};
+		4D86C0151DFEFD7900A4A1A0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4D2A080F1D6F749800BB9FB7 /* Assets.xcassets */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		4DE50CC71DE13DC600AFD5D1 /* Controller */ = {
@@ -241,7 +251,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D3223AE1DE28C450058B742 /* JoseParserTests.swift in Sources */,
+				4D3223AE1DE28C450058B742 /* RosettaTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -262,6 +272,7 @@
 				4D2A08121D6F749800BB9FB7 /* Base */,
 			);
 			name = Main.storyboard;
+			path = Rosetta;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -359,7 +370,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = JoseParser/Info.plist;
+				INFOPLIST_FILE = Rosetta/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.joamafer.JoseParser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -372,7 +383,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = JoseParser/Info.plist;
+				INFOPLIST_FILE = Rosetta/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.joamafer.JoseParser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -388,7 +399,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 5B3AET4U6J;
-				INFOPLIST_FILE = JoseParserTests/Info.plist;
+				INFOPLIST_FILE = RosettaTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joamafer.JoseParserTests;
@@ -407,7 +418,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 5B3AET4U6J;
-				INFOPLIST_FILE = JoseParserTests/Info.plist;
+				INFOPLIST_FILE = RosettaTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = com.joamafer.JoseParserTests;

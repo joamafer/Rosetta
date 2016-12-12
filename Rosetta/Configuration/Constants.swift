@@ -1,6 +1,6 @@
 //
 //  PreferencesConfiguration.swift
-//  JoseParser
+//  Rosetta
 //
 //  Created by JOSE ANTONIO MARTINEZ FERNANDEZ on 20/11/2016.
 //  Copyright © 2016 joamafer. All rights reserved.

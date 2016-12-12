@@ -1,6 +1,6 @@
 //
-//  JoseParserTests.swift
-//  JoseParserTests
+//  RosettaTests.swift
+//  RosettaTests
 //
 //  Created by JOSE ANTONIO MARTINEZ FERNANDEZ on 21/11/2016.
 //  Copyright © 2016 joamafer. All rights reserved.
@@ -8,7 +8,7 @@
 
 import XCTest
 
-class JoseParserTests: XCTestCase {
+class RosettaTests: XCTestCase {
     
     override func setUp() {
         super.setUp()

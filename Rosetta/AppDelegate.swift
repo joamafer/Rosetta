@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  JoseParser
+//  Rosetta
 //
 //  Created by JOSE ANTONIO MARTINEZ FERNANDEZ on 25/08/2016.
 //  Copyright © 2016 joamafer. All rights reserved.
