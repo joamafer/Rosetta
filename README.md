@@ -28,6 +28,11 @@ Keep in mind that I have adapted the resulting code specifically to our company 
 ## Upcoming versions
 
 0.2.2
+- Added NSAlert to show possible errors when parsing.
+- Cleaned resulting code for manual mapping.
+- Clean code and refactoring.
+
+0.2.3
 - Test for missing features and known/possible bugs by testing against 'http://petstore.swagger.io'
 - Handling mapping of dictionaries inside the main model, e.g. 'prices' dictionary (currency, amount, divisor) inside 'clothes' model.
 
