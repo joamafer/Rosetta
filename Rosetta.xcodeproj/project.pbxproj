@@ -14,7 +14,6 @@
 		4D0FE08D1DFF0DFB00880191 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D0FE08C1DFF0DFB00880191 /* Assets.xcassets */; };
 		4D0FE08F1DFF0E0500880191 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0FE08E1DFF0E0500880191 /* AppDelegate.swift */; };
 		4D0FE0951DFF0E3800880191 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D0FE0921DFF0E1900880191 /* Main.storyboard */; };
-		4D0FE0981DFF0E4B00880191 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4D0FE0961DFF0E4B00880191 /* Info.plist */; };
 		4D0FE0991DFF0E4B00880191 /* RosettaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0FE0971DFF0E4B00880191 /* RosettaTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -180,7 +179,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = joamafer;
 				TargetAttributes = {
 					4D2A08071D6F749800BB9FB7 = {
@@ -229,7 +228,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D0FE0981DFF0E4B00880191 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,18 +9,22 @@
 import Foundation
 import Cocoa
 
-enum VariableTypes: String {
+enum BuiltinDataTypes: String {
+    case int, uint, float, double, bool, string, character, optional
+}
+
+enum ParsedVariableTypes: String {
     case number, integer, boolean
 
     static func convertToFinalType(providedType : String) -> String {
-        if let varType = VariableTypes(rawValue: providedType) {
+        if let varType = ParsedVariableTypes(rawValue: providedType) {
             switch varType {
             case .number:
-                return "Double"
+                return BuiltinDataTypes.double.rawValue.capitalized
             case .integer:
-                return "Int"
+                return BuiltinDataTypes.int.rawValue.capitalized
             case .boolean:
-                return "Bool"
+                return BuiltinDataTypes.bool.rawValue.capitalized
             }
         }
         
@@ -30,6 +34,7 @@ enum VariableTypes: String {
 
 protocol ParserDelegate : class {
     func parseDidSuccess(_ parsedString: String)
+    func parseDidFail(_ error : String, hint: String)
     func parseDidFail(_ error : String)
 }
 
@@ -45,7 +50,7 @@ class Parser {
     let doubleSpace = "  "
     
     required init(delegate: ParserDelegate) {
-        self.delegate = delegate
+        self.delegate = delegate        
     }
     
     func parse(text: String, addCommentsHeader: Bool, indentSpaces: Int, mappingMode: MappingMode) {
@@ -54,7 +59,7 @@ class Parser {
         components = components.filter{!$0.isEmpty}.map{$0.trimmingCharacters(in: .whitespaces)}
         
         guard components.count == 2 else { // [0] = className, [1] = body
-            self.delegate?.parseDidFail("The format of the model provided is not correct")
+            self.delegate?.parseDidFail("The format of the model provided is not correct", hint: "Ensure the format matches the data type from Swagger.")
             return
         }
         
@@ -109,7 +114,7 @@ class Parser {
         case .objectmapper:
             parsedString! += "import ObjectMapper" + newLine + newLine
         case .manual:
-            break
+            parsedString! += "import Foundation" + newLine + newLine
         case .freddy, .gloss, .swiftyJSON:
             // TODO: Work on this
             break
@@ -121,6 +126,9 @@ class Parser {
     /// - Parameter body: model before parsing
     func createBody(body: String) {
         
+        // TODO: Parse array inside the objects, e.g. user {wifeNames:["ana", "scarlett", "susan"]}
+        // TODO: Parse classes inside the objects
+        
         modelTuplesArray = []
         
         let lines: [String] = body.components(separatedBy: .newlines).filter{ !$0.isEmpty }
@@ -129,7 +137,7 @@ class Parser {
             if let tuple = self.parseLine(String(line.characters.filter{ !" \t\r".characters.contains($0) })) {
                 modelTuplesArray.append(tuple)
             } else {
-                self.delegate?.parseDidFail("Cannot parse line. Invalid format provided")
+                self.delegate?.parseDidFail("Cannot parse line. Invalid format provided", hint: "The following line: \(line) does not seems to have a valid format.")
                 
                 return
             }
@@ -150,29 +158,41 @@ class Parser {
     /// - Parameter line: line before mapping
     /// - Returns: tuple containing the variable name, type and posible enum values
     func parseLine(_ line : String) -> (varName: String, varType: String, enumValues: [String]?)? {
-        
-        let customCharacterSet = CharacterSet(charactersIn: "(,")
-        let lineComponents = line.components(separatedBy: customCharacterSet).filter{ !$0.isEmpty }
-        
-        guard lineComponents.count > 2 else {
+
+        guard let parametersString = line.slice(from: "(", to: ")") else {
             return nil
         }
         
-        let variableName = lineComponents[0]
-        let variableType = VariableTypes.convertToFinalType(providedType: lineComponents[1])
-        var enumValues : [String]?
-        
-        if lineComponents.count > 3 { // line is enum
-            
-            let customCharacterSet = CharacterSet(charactersIn: "[]")
-            let enumComponents = line.components(separatedBy: customCharacterSet).filter{ !$0.isEmpty }
-            
-            if enumComponents.count == 3 {
-                enumValues = self.parseEnumValues(enumValues: enumComponents[1])
-            }
+        guard let startParenthesisRange = line.range(of: "("),
+            let endParenthesisRange = line.range(of: ")") else {
+            return nil
         }
         
-        return (varName: variableName, varType: variableType, enumValues: enumValues)
+        let parametersComponents = parametersString.components(separatedBy: CharacterSet(charactersIn: ",")).filter{ !$0.isEmpty }
+        
+        var varType: String
+        if parametersComponents.isEmpty { // only has the type
+            varType = parametersString
+        } else {
+            varType = parametersComponents.first!
+        }
+        
+        // the type is an array, e.g. tags (Array[Tag], optional),
+        if let arrayType = varType.slice(from: "[", to: "]") {
+            varType = "[\(arrayType.capitalized)]"
+        }
+        
+        let variableName = line.substring(to: startParenthesisRange.lowerBound)
+        let variableType = ParsedVariableTypes.convertToFinalType(providedType: varType)
+        var enumValues : [String]?
+        
+        let restLine = line.substring(from: endParenthesisRange.lowerBound)
+        
+        if let enumValuesString = restLine.slice(from: "[", to: "]") { // there's an enum
+            enumValues = self.parseEnumValues(enumValues: enumValuesString)
+        }
+        
+        return (varName: variableName, varType: variableType.capitalized, enumValues: enumValues)
     }
     
     /// Parse enum values from the string to array of strings
@@ -211,7 +231,7 @@ class Parser {
         do {
             try text.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
         } catch {
-            self.delegate?.parseDidFail("Bad permissions, bad filename, missing permissions or the encoding failed")
+            self.delegate?.parseDidFail("Cannot create file", hint: "Bad permissions, bad filename, missing permissions or the encoding failed.")
         }
     }
     
@@ -250,23 +270,48 @@ class Parser {
         var fileBody = "public class \(className!): NSObject {\(newLine)"
         createVariableDeclarations(body: &fileBody)
         
-        fileBody += newLine + indent() + "func mapArray(mappingArray: [AnyObject]) -> [\(className!)] {" + newLine + indent(level: 2)
-        fileBody += "var mapArray = [\(className!)]()\(newLine)" + indent(level: 2)
-        fileBody += "for mappingObject in mappingArray {\(newLine)" + indent(level: 3)
-        fileBody += "if let mapping\(className!) = mappingObject as? [String: Any] {\(newLine)" + indent(level: 4)
+        fileBody += newLine + indent() + "func map(array: [AnyObject]) -> [\(className!)] {" + newLine + indent(level: 2)
+        fileBody += "var mappedArray = [\(className!)]()\(newLine)" + indent(level: 2)
+        fileBody += "for element in array {\(newLine)" + indent(level: 3)
+        fileBody += "if let dictionary = element as? [String: Any] {\(newLine)" + indent(level: 4)
         fileBody += "let \(className!.lowercased()) = \(className!)()\(newLine)" + indent(level: 4)
-        fileBody += "\(className!.lowercased()).map(mappingObject: mapping\(className!))\(newLine)" + indent(level: 4)
-        fileBody += "mapArray.append(\(className!.lowercased()))\(newLine)" + indent(level: 3)
+        fileBody += "\(className!.lowercased()).map(dictionary: dictionary)\(newLine)" + indent(level: 4)
+        fileBody += "mappedArray.append(\(className!.lowercased()))\(newLine)" + indent(level: 3)
         fileBody += "}\(newLine)" + indent(level: 2)
         fileBody += "}\(newLine)\(newLine)" + indent(level: 2)
-        fileBody += "return mapArray\n" + indent() + "}\(newLine)\(newLine)" + indent()
+        fileBody += "return mappedArray\n" + indent() + "}\(newLine)\(newLine)" + indent()
         
-        fileBody += "private func map(mappingObject: [String: Any]) {\(newLine)"
+        fileBody += "func map(dictionary: [String: Any]) {\(newLine)"
         
         for modelTuple in modelTuplesArray {
             fileBody += indent(level: 2)
-            fileBody += "if let " + modelTuple.varName + " = mappingObject[\"\(modelTuple.varName))\"] as? \(modelTuple.varType.capitalized) {\(newLine)" + indent(level: 3)
-            fileBody += "self.\((modelTuple.varName)) = \((modelTuple.varName))\(newLine)" + indent(level: 2) + "}\(newLine)"
+            if modelTuple.enumValues != nil {
+                fileBody += "self.\(modelTuple.varName) = \(modelTuple.varName.capitalized)(rawValue: dictionary[\"\(modelTuple.varName)\"] as? \(modelTuple.varType))\(newLine)"
+            } else {
+                
+                // TODO: Clean this and check if this works on ObjectMapper
+                // we need to check if we are treating an array of custom objects
+                if let type = modelTuple.varType.slice(from: "[", to: "]") {
+                    if BuiltinDataTypes(rawValue: type.lowercased()) == nil {
+                        // array of custom types
+                        
+                        fileBody += "if let \(modelTuple.varName)Array = dictionary[\"\(modelTuple.varName)\"] as? [AnyObject] {\(newLine)"
+                        fileBody += indent(level: 3) + "self.\(modelTuple.varName) = \(type)().map(array: \(modelTuple.varName)Array)" + newLine + indent(level: 2) + "}" + newLine
+                    } else {
+                        // it's an array of builtin types
+                        fileBody += "self.\(modelTuple.varName) = dictionary[\"\(modelTuple.varName)\"] as? \(modelTuple.varType)\(newLine)"
+                    }
+                    
+                } else if BuiltinDataTypes(rawValue: modelTuple.varType.lowercased()) == nil {
+                    // dictionary of custom types
+                    
+                    fileBody += "if let \(modelTuple.varName)Dictionary = dictionary[\"\(modelTuple.varName)\"] as? [String: AnyObject] {\(newLine)"
+                    fileBody += indent(level: 3) + "self.\(modelTuple.varName) = \(modelTuple.varType)().map(dictionary: \(modelTuple.varName)Dictionary)" + newLine + indent(level: 2) + "}" + newLine
+                } else {
+                    // it's a builtin type
+                    fileBody += "self.\(modelTuple.varName) = dictionary[\"\(modelTuple.varName)\"] as? \(modelTuple.varType)\(newLine)"
+                }
+            }
         }
         
         fileBody += indent() + "}\(newLine)}\(newLine)"
@@ -281,7 +326,7 @@ class Parser {
             if modelTuple.enumValues != nil {
                 body += modelTuple.varName.capitalized
             } else {
-                body += modelTuple.varType.capitalized
+                body += modelTuple.varType
             }
             
             body += "?\(newLine)"
@@ -320,5 +365,17 @@ extension Parser { // Helpers
         }
         
         return enumStringRawValue
+    }
+}
+
+extension String {
+    
+    func slice(from: String, to: String) -> String? {
+        
+        return (range(of: from)?.upperBound).flatMap { substringFrom in
+            (range(of: to, range: substringFrom..<endIndex)?.lowerBound).map { substringTo in
+                substring(with: substringFrom..<substringTo)
+            }
+        }
     }
 }

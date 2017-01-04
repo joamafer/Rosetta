@@ -18,6 +18,8 @@ class ParserViewController: NSViewController {
     @IBOutlet weak var saveFileToDeskopButton: NSButton!
     var parser: Parser!
     
+    // TODO: Check if I need this for OSX deployment target specified
+    // TODO: Check deployment target
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -62,9 +64,9 @@ class ParserViewController: NSViewController {
     // MARK: - Actions
     
     @IBAction func parseButtonWasTapped(_ sender: AnyObject) {
-        
         guard let text = parserTextView.string, !text.isEmpty else {
-            NSBeep()
+            parseDidFail("The format of the model provided is not correct", hint: "Ensure the format matches the data type from Swagger.")
+            
             return
         }
         
@@ -90,6 +92,21 @@ class ParserViewController: NSViewController {
         alert.informativeText = "- Access the app preferences to configure your settings.\n- Paste the model class from Swagger API docs.\n- Tap on Parse button.\n- Check the parsed text is ok or modify it.\n- Tap on Save File in Desktop."
         alert.messageText = "How to use this app"
         alert.beginSheetModal(for: self.view.window!, completionHandler: nil)
+    }
+    
+    // MARK: - Helpers
+    
+    func createWarningAlert(message: String, informative: String = "") {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.icon = NSImage(named: NSImageNameCaution)
+        alert.messageText = message
+        alert.informativeText = informative
+        if let window = self.view.window {
+            alert.beginSheetModal(for: window, completionHandler: nil)
+        } else {
+            alert.runModal()
+        }
     }
 }
 
@@ -133,7 +150,10 @@ extension ParserViewController: ParserDelegate {
     }
     
     func parseDidFail(_ error: String) {
-        // TODO: Show error
-        NSBeep()
+        createWarningAlert(message: error)
+    }
+    
+    func parseDidFail(_ error: String, hint: String) {
+        createWarningAlert(message: error, informative: hint)
     }
 }
