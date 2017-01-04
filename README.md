@@ -13,6 +13,8 @@ In our company we use to work with Swagger.io. I was always finding myself over 
 Basically you only need to paste the model class from Swagger.io in the left text view and it will automatically create the Swift model class for you in the right one. Then you can review the generated code and correct it in case you spot any error. Finally there's a button which saves your class file in the desktop.
 Keep in mind that I have adapted the resulting code specifically to our company and way of work, so we have 100% fully ready and integrated classes for our projects to save time. Ah!, it also maps the enum values and creates the enumerations for you. Now I have added a preferences panel where you can set some desired parsing options, like the number of spaces for indentation, toggle the proprietary comments or specify the desired parsing tool.
 
+[![Rosetta demo video](Readme Resources/DemoVideo.png)](https://www.youtube.com/watch?v=wGnYYJuISlQ)
+
 ## Release Notes
 
 0.2.2
